@@ -1,0 +1,21 @@
+{
+  "defaultConnection": "default",
+  "connections": {
+    "default": {
+      "connector": "strapi-hook-mongoose",
+      "settings": {
+        "client": "mongo",
+        "host": "ds151530.mlab.com",
+        "srv": false,
+        "port": "51530",
+        "database": "brewerystore",
+        "username": "eugenebutenko",
+        "password": "147258369aA"
+      },
+      "options": {
+        "authenticationDatabase": "brewerystore",
+        "ssl": false
+      }
+    }
+  }
+}
