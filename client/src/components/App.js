@@ -20,7 +20,8 @@ const strapi = new Strapi(apiUrl);
 
 class App extends Component {
   state = {
-    brands: []
+    brands: [],
+    searchTerm: ""
   };
 
   async componentDidMount() {
@@ -52,8 +53,16 @@ class App extends Component {
     this.setState({ searchTerm: value });
   };
 
+  filteredBrands = ({ searchTerm, brands }) => {
+    return brands.filter(brand => {
+      return (
+        brand.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        brand.description.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    });
+  };
+
   render() {
-    const { brands } = this.state;
     return (
       <Container>
         {/* Brand Search */}
@@ -63,6 +72,7 @@ class App extends Component {
             accessibilityLabel="Brands Search Field"
             onChange={this.handleChange}
             placeholder="Search Brands..."
+            value={this.state.searchTerm}
           />
           <Box margin={3}>
             <Icon
@@ -95,7 +105,7 @@ class App extends Component {
           justifyContent="around"
         >
           {/* Displaying individual brand */}
-          {brands.map(brand => (
+          {this.filteredBrands(this.state).map(brand => (
             <Box paddingY={4} width={200} margin={2} key={brand._id}>
               <Card
                 image={
