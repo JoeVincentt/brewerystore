@@ -1,6 +1,15 @@
 import React, { Component } from "react";
 
-import { Container, Box, Heading, Card, Image, Text } from "gestalt";
+import {
+  Container,
+  Box,
+  Heading,
+  Card,
+  Image,
+  Text,
+  SearchField,
+  Icon
+} from "gestalt";
 
 import "./App.css";
 import Strapi from "strapi-sdk-javascript/build/main";
@@ -38,10 +47,33 @@ class App extends Component {
     }
   }
 
+  handleChange = e => {
+    const { value } = e;
+    this.setState({ searchTerm: value });
+  };
+
   render() {
     const { brands } = this.state;
     return (
       <Container>
+        {/* Brand Search */}
+        <Box display="flex" justifyContent="center" marginTop={4}>
+          <SearchField
+            id="searchField"
+            accessibilityLabel="Brands Search Field"
+            onChange={this.handleChange}
+            placeholder="Search Brands..."
+          />
+          <Box margin={3}>
+            <Icon
+              icon="filter"
+              color={this.state.searchTerm ? "orange" : "gray"}
+              size={20}
+              accessibilityLabel="Filter"
+            />
+          </Box>
+        </Box>
+
         {/* Brands section */}
         <Box display="flex" justifyContent="center" marginBottom={2}>
           {/* Brands header */}
@@ -49,6 +81,7 @@ class App extends Component {
             Brew Brands
           </Heading>
         </Box>
+
         {/* Brands */}
         <Box
           dangerouslySetInlineStyle={{
@@ -61,6 +94,7 @@ class App extends Component {
           display="flex"
           justifyContent="around"
         >
+          {/* Displaying individual brand */}
           {brands.map(brand => (
             <Box paddingY={4} width={200} margin={2} key={brand._id}>
               <Card
