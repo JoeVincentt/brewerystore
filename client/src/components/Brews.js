@@ -14,6 +14,7 @@ import {
   IconButton
 } from "gestalt";
 import { Link } from "react-router-dom";
+import { calculateTotalPrice } from "../utils/index";
 
 const apiUrl = process.env.API_URL || " http://localhost:1337";
 const strapi = new Strapi(apiUrl);
@@ -89,6 +90,13 @@ class Brews extends Component {
       updatedItems[alreadyInCart].quantity += 1;
       this.setState({ cartItems: updatedItems });
     }
+  };
+
+  removeItemFromCart = itemId => {
+    const filteredItems = this.state.cartItems.filter(
+      item => item._id !== itemId
+    );
+    this.setState({ cartItems: filteredItems });
   };
 
   render() {
@@ -217,7 +225,7 @@ class Brews extends Component {
                       icon="cancel"
                       size="sm"
                       iconColor="red"
-                      // onClick={}
+                      onClick={() => this.removeItemFromCart(item._id)}
                     />
                   </Box>
                 ))}
@@ -233,7 +241,7 @@ class Brews extends Component {
                       <Text color="red">Please select some items</Text>
                     )}
                   </Box>
-                  <Text size="lg">Total: $2.99</Text>
+                  <Text size="lg">Total: {calculateTotalPrice(cartItems)}</Text>
                   <Text>
                     <Link to="/checkout">Checkout</Link>
                   </Text>
