@@ -10,10 +10,10 @@ import {
   SearchField,
   Icon,
   Button,
-  Mask
+  Mask,
+  IconButton
 } from "gestalt";
 import { Link } from "react-router-dom";
-import Loader from "./Loader";
 
 const apiUrl = process.env.API_URL || " http://localhost:1337";
 const strapi = new Strapi(apiUrl);
@@ -71,6 +71,24 @@ class Brews extends Component {
         brew.description.toLowerCase().includes(searchTerm.toLowerCase())
       );
     });
+  };
+
+  addToCart = brew => {
+    const alreadyInCart = this.state.cartItems.findIndex(
+      item => item._id === brew._id
+    );
+
+    if (alreadyInCart === -1) {
+      const updatedItems = this.state.cartItems.concat({
+        ...brew,
+        quantity: 1
+      });
+      this.setState({ cartItems: updatedItems });
+    } else {
+      const updatedItems = [...this.state.cartItems];
+      updatedItems[alreadyInCart].quantity += 1;
+      this.setState({ cartItems: updatedItems });
+    }
   };
 
   render() {
@@ -157,7 +175,11 @@ class Brews extends Component {
                       <Text>{brew.description}</Text>
                       <Text color="orchid">${brew.price}</Text>
                       <Box margin={2}>
-                        <Button color="blue" text="Add to Cart" />
+                        <Button
+                          onClick={() => this.addToCart(brew)}
+                          color="blue"
+                          text="Add to Cart"
+                        />
                       </Box>
                     </Box>
                   </Card>
@@ -176,7 +198,7 @@ class Brews extends Component {
                 padding={2}
               >
                 {/* User Cart Heading */}
-                <Heading align="center" size="md">
+                <Heading align="center" size="sm">
                   Your Cart
                 </Heading>
                 <Text color="gray" italic>
@@ -184,6 +206,21 @@ class Brews extends Component {
                 </Text>
 
                 {/* Cart Items */}
+                {cartItems.map(item => (
+                  <Box key={item._id} display="flex" alignItems="center">
+                    <Text>
+                      {item.name} x {item.quantity} - $
+                      {(item.quantity * item.price).toFixed(2)}
+                    </Text>
+                    <IconButton
+                      accessibilityLabel="Delete Item"
+                      icon="cancel"
+                      size="sm"
+                      iconColor="red"
+                      // onClick={}
+                    />
+                  </Box>
+                ))}
 
                 <Box
                   display="flex"
@@ -205,9 +242,6 @@ class Brews extends Component {
             </Mask>
           </Box>
         </Box>
-
-        {/* Loader Here */}
-        {this.state.loadingBrands ? <Loader /> : null}
       </Container>
     );
   }
