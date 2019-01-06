@@ -22,6 +22,12 @@ export const getCart = (cartKey = CART_KEY) => {
   return [];
 };
 
+export const clearCart = (cartKey = CART_KEY) => {
+  if (localStorage) {
+    localStorage.removeItem(cartKey);
+  }
+};
+
 //Auth func
 
 export const setToken = (value, tokenKey = TOKEN_KEY) => {
@@ -35,4 +41,10 @@ export const getToken = (tokenKey = TOKEN_KEY) => {
     return JSON.parse(localStorage.getItem(tokenKey));
   }
   return null;
+};
+
+export const clearToken = (tokenKey = TOKEN_KEY) => {
+  if (localStorage) {
+    localStorage.removeItem(tokenKey);
+  }
 };
