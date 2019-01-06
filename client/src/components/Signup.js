@@ -1,6 +1,11 @@
 import React, { Component } from "react";
 import { Container, Box, Heading, Text, TextField, Button } from "gestalt";
 import ToastMessage from "./ToastMessage";
+import { setToken } from "../utils/index";
+import Strapi from "strapi-sdk-javascript/build/main";
+
+const apiUrl = process.env.API_URL || " http://localhost:1337";
+const strapi = new Strapi(apiUrl);
 
 class Signup extends Component {
   state = {
@@ -8,7 +13,8 @@ class Signup extends Component {
     email: "",
     password: "",
     toast: false,
-    toastMessage: ""
+    toastMessage: "",
+    loading: false
   };
 
   handleChange = ({ event, value }) => {
@@ -16,14 +22,29 @@ class Signup extends Component {
     this.setState({ [event.target.name]: value });
   };
 
-  handleSubmit = event => {
+  handleSubmit = async event => {
     event.preventDefault();
+    const { username, email, password } = this.state;
+
     if (this.isFormEmpty(this.state)) {
       this.showToast("Fill in all fields");
       return;
     }
-    console.log("submit");
+
+    //Sign up Use
+    try {
+      this.setState({ loading: true });
+      const response = await strapi.register(username, email, password);
+      this.setState({ loading: false });
+      setToken(response.jwt);
+      this.redirectUser("/");
+    } catch (error) {
+      this.setState({ loading: false });
+      this.showToast(error.message);
+    }
   };
+
+  redirectUser = path => this.props.history.push(path);
 
   isFormEmpty = ({ username, email, password }) => {
     return !username || !email || !password;
@@ -35,7 +56,7 @@ class Signup extends Component {
   };
 
   render() {
-    const { toastMessage, toast } = this.state;
+    const { toastMessage, toast, loading } = this.state;
     return (
       <Container>
         <Box
@@ -103,7 +124,13 @@ class Signup extends Component {
               />
             </Box>
             <Box marginTop={2}>
-              <Button inline color="blue" text="Submit" type="submit" />
+              <Button
+                inline
+                color="blue"
+                text="Submit"
+                type="submit"
+                disabled={loading}
+              />
             </Box>
           </form>
         </Box>
