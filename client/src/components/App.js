@@ -14,6 +14,7 @@ import {
 import "./App.css";
 import Strapi from "strapi-sdk-javascript/build/main";
 import { Link } from "react-router-dom";
+import Loader from "./Loader";
 
 const apiUrl = process.env.API_URL || " http://localhost:1337";
 const strapi = new Strapi(apiUrl);
@@ -21,7 +22,8 @@ const strapi = new Strapi(apiUrl);
 class App extends Component {
   state = {
     brands: [],
-    searchTerm: ""
+    searchTerm: "",
+    loadingBrands: true
   };
 
   async componentDidMount() {
@@ -42,9 +44,10 @@ class App extends Component {
         }
       });
       // console.log(response);
-      this.setState({ brands: response.data.brands });
+      this.setState({ brands: response.data.brands, loadingBrands: false });
     } catch (error) {
       console.log(error);
+      this.setState({ loadingBrands: false });
     }
   }
 
@@ -138,6 +141,9 @@ class App extends Component {
             </Box>
           ))}
         </Box>
+
+        {/* Loader Here */}
+        {this.state.loadingBrands ? <Loader /> : null}
       </Container>
     );
   }
