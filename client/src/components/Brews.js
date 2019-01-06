@@ -9,8 +9,11 @@ import {
   Text,
   SearchField,
   Icon,
-  Button
+  Button,
+  Mask
 } from "gestalt";
+import { Link } from "react-router-dom";
+import Loader from "./Loader";
 
 const apiUrl = process.env.API_URL || " http://localhost:1337";
 const strapi = new Strapi(apiUrl);
@@ -20,7 +23,8 @@ class Brews extends Component {
     brand: "",
     brews: [],
     searchTerm: "",
-    loadingBrands: true
+    loadingBrands: true,
+    cartItems: []
   };
 
   async componentDidMount() {
@@ -70,7 +74,7 @@ class Brews extends Component {
   };
 
   render() {
-    const { brand } = this.state;
+    const { brand, cartItems } = this.state;
 
     return (
       <Container>
@@ -97,13 +101,19 @@ class Brews extends Component {
           display="flex"
           justifyContent="center"
           alignItems="start"
+          dangerouslySetInlineStyle={{
+            __style: {
+              flexWrap: "wrap-reverse"
+            }
+          }}
         >
           {/* Brews Section */}
           <Box display="flex" direction="column" alignItems="center">
             {/* Brews Heading */}
-            <Box margin={2}>
+            <Box padding={2}>
               <Heading color="orchid">{brand}</Heading>
             </Box>
+
             {/* Brews */}
             <Box
               dangerouslySetInlineStyle={{
@@ -155,7 +165,49 @@ class Brews extends Component {
               ))}
             </Box>
           </Box>
+
+          {/* User Cart */}
+          <Box alignSelf="end" marginTop={2} marginLeft={8}>
+            <Mask shape="rounded" wash>
+              <Box
+                display="flex"
+                direction="column"
+                alignItems="center"
+                padding={2}
+              >
+                {/* User Cart Heading */}
+                <Heading align="center" size="md">
+                  Your Cart
+                </Heading>
+                <Text color="gray" italic>
+                  {cartItems.length} items selected
+                </Text>
+
+                {/* Cart Items */}
+
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  direction="column"
+                >
+                  <Box margin={2}>
+                    {cartItems.length === 0 && (
+                      <Text color="red">Please select some items</Text>
+                    )}
+                  </Box>
+                  <Text size="lg">Total: $2.99</Text>
+                  <Text>
+                    <Link to="/checkout">Checkout</Link>
+                  </Text>
+                </Box>
+              </Box>
+            </Mask>
+          </Box>
         </Box>
+
+        {/* Loader Here */}
+        {this.state.loadingBrands ? <Loader /> : null}
       </Container>
     );
   }
