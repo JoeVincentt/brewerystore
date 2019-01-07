@@ -123,6 +123,7 @@ class _CheckoutForm extends Component {
                 style={{
                   display: "inlineBlock",
                   textAlign: "center",
+                  width: 300,
                   maxWidth: 450
                 }}
                 onSubmit={this.handleConfirmOrder}
