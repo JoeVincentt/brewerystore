@@ -1,5 +1,5 @@
-server
-brands-images
-brews-images
+/server
+/brands-images
+/brews-images
 brands.json
 brews.json
