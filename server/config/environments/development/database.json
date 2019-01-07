@@ -5,12 +5,12 @@
       "connector": "strapi-hook-mongoose",
       "settings": {
         "client": "mongo",
-        "host": "ds151530.mlab.com",
+        "host": "XXXXXX",
         "srv": false,
-        "port": "51530",
-        "database": "brewerystore",
-        "username": "eugenebutenko",
-        "password": "147258369aA"
+        "port": "XXXXX",
+        "database": "XXXXX",
+        "username": "XXXXX",
+        "password": "XXXXXX"
       },
       "options": {
         "authenticationDatabase": "brewerystore",
