@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import { Container, Box, Heading, TextField, Button, Text } from "gestalt";
+//prettier-ignore
+import { Container, Box, Heading, TextField, Button, Text, Modal, Spinner } from "gestalt";
 import ToastMessage from "./ToastMessage";
 import { getCart, calculateTotalPrice } from "../utils/index";
 
@@ -11,7 +12,9 @@ class Checkout extends Component {
     city: "",
     confirmationEmail: "",
     toast: false,
-    toastMessage: ""
+    toastMessage: "",
+    orderProccessing: false,
+    madal: false
   };
 
   componentDidMount() {
@@ -30,7 +33,11 @@ class Checkout extends Component {
       this.showToast("Fill in all fields");
       return;
     }
+
+    this.setState({ modal: true });
   };
+
+  handleSubmitOrder = () => {};
 
   redirectUser = path => this.props.history.push(path);
 
@@ -43,8 +50,18 @@ class Checkout extends Component {
     setTimeout(() => this.setState({ toast: false, toastMessage: "" }), 3000);
   };
 
+  closeModal = () => {
+    this.setState({ modal: false });
+  };
+
   render() {
-    const { toast, toastMessage, cartItems } = this.state;
+    const {
+      toast,
+      toastMessage,
+      cartItems,
+      modal,
+      orderProccessing
+    } = this.state;
 
     return (
       <Container>
@@ -155,7 +172,7 @@ class Checkout extends Component {
             </React.Fragment>
           ) : (
             //Default text if empty cart
-            <Box color="darkWash" shape="rounded" padding={4}>
+            <Box padding={4}>
               <Heading align="center" color="watermelon" size="xs">
                 Your Cart is Empty
               </Heading>
@@ -165,9 +182,98 @@ class Checkout extends Component {
             </Box>
           )}
         </Box>
+        {/* Confirmation Modal */}
+        {modal && (
+          <ConfirmationModal
+            orderProccessing={orderProccessing}
+            cartItems={cartItems}
+            closeModal={this.closeModal}
+            handleSubmitOrder={this.handleSubmitOrder}
+          />
+        )}
         <ToastMessage show={toast} message={toastMessage} />
       </Container>
     );
   }
 }
+
+const ConfirmationModal = ({
+  orderProccessing,
+  cartItems,
+  closeModal,
+  handleSubmitOrder
+}) => (
+  <Modal
+    accessibilityCloseLabel="close"
+    accessibilityModalLabel="Confirm Your Order"
+    heading="Confirm Your Order"
+    onDismiss={closeModal}
+    footer={
+      <Box
+        display="flex"
+        marginRight={-1}
+        marginLeft={-1}
+        justifyContent="center"
+      >
+        <Box padding={1}>
+          <Button
+            size="lg"
+            color="red"
+            text="Submit"
+            disabled={orderProccessing}
+            onClick={handleSubmitOrder}
+          />
+        </Box>
+        <Box padding={1}>
+          <Button
+            size="lg"
+            text="Cancel"
+            disabled={orderProccessing}
+            onClick={closeModal}
+          />
+        </Box>
+      </Box>
+    }
+    role="alertdialog"
+    size="sm"
+  >
+    {/* Order Summary */}
+
+    {!orderProccessing && (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        direction="column"
+        padding={2}
+        color="lightWash"
+      >
+        {cartItems.map(item => (
+          <Box key={item._id} padding={1}>
+            <Text size="lg" color="red">
+              {item.name} x {item.quantity} -${item.quantity * item.price}
+            </Text>
+          </Box>
+        ))}
+        <Box paddingY={2}>
+          <Text size="lg" bold>
+            Total: {calculateTotalPrice(cartItems)}
+          </Text>
+        </Box>
+      </Box>
+    )}
+
+    {/* Order Processing */}
+    <Spinner
+      show={orderProccessing}
+      accessibilityLabel="Prder Processing Spinner"
+    />
+    {orderProccessing && (
+      <Text align="center" italic>
+        Submit Order...
+      </Text>
+    )}
+  </Modal>
+);
+
 export default Checkout;
