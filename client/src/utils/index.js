@@ -7,6 +7,12 @@ export const calculateTotalPrice = items => {
     .toFixed(2)}`;
 };
 
+export const calculateTotalAmount = items => {
+  return Number(
+    items.reduce((acc, item) => acc + item.quantity * item.price, 0).toFixed(2)
+  );
+};
+
 // Cart Functions
 
 export const setCart = (value, cartKey = CART_KEY) => {

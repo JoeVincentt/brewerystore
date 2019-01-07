@@ -4,7 +4,17 @@ import { Container, Box, Heading, TextField, Button, Text, Modal, Spinner } from
 //prettier-ignore
 import {Elements, StripeProvider, CardElement, injectStripe} from 'react-stripe-elements';
 import ToastMessage from "./ToastMessage";
-import { getCart, calculateTotalPrice } from "../utils/index";
+import {
+  getCart,
+  calculateTotalPrice,
+  clearCart,
+  calculateTotalAmount
+} from "../utils/index";
+import { withRouter } from "react-router-dom";
+import Strapi from "strapi-sdk-javascript/build/main";
+
+const apiUrl = process.env.API_URL || " http://localhost:1337";
+const strapi = new Strapi(apiUrl);
 
 class _CheckoutForm extends Component {
   state = {
@@ -39,7 +49,43 @@ class _CheckoutForm extends Component {
     this.setState({ modal: true });
   };
 
-  handleSubmitOrder = () => {};
+  handleSubmitOrder = async () => {
+    const { cartItems, city, address, zip } = this.state;
+
+    const amount = calculateTotalAmount(cartItems);
+
+    //Process order
+    this.setState({ orderProccessing: true });
+
+    let token;
+
+    try {
+      //create stripe token
+      const response = await this.props.stripe.createToken();
+
+      if (response.error.message) {
+        this.setState({ orderProccessing: false, modal: false });
+        this.showToast(response.error.message);
+        return;
+      }
+      token = response.token.id;
+      //create order with strapi sdk (req to backend)
+      await strapi.createEntry("orders", {
+        amount,
+        brews: cartItems,
+        city,
+        zip,
+        address,
+        token
+      });
+      this.setState({ orderProccessing: false, modal: false });
+      clearCart();
+      this.showToast("Your order has beed successfully submitted!", true);
+    } catch (error) {
+      this.setState({ orderProccessing: false, modal: false });
+      this.showToast("Payment Error");
+    }
+  };
 
   redirectUser = path => this.props.history.push(path);
 
@@ -47,9 +93,17 @@ class _CheckoutForm extends Component {
     return !address || !zip || !confirmationEmail || !city;
   };
 
-  showToast = toastMessage => {
+  showToast = (toastMessage, redirect = false) => {
     this.setState({ toast: true, toastMessage });
-    setTimeout(() => this.setState({ toast: false, toastMessage: "" }), 3000);
+    setTimeout(
+      () =>
+        this.setState(
+          { toast: false, toastMessage: "" },
+          //if TRUE passed to redirect arg, redirect to homepage
+          () => redirect && this.props.history.push("/")
+        ),
+      3000
+    );
   };
 
   closeModal = () => {
@@ -142,7 +196,7 @@ class _CheckoutForm extends Component {
                 <Box margin={1}>
                   <TextField
                     id="zip"
-                    type="number"
+                    type="text"
                     name="zip"
                     placeholder="Zip Code"
                     onChange={this.handleChange}
@@ -287,7 +341,7 @@ const ConfirmationModal = ({
   </Modal>
 );
 
-const CheckoutForm = injectStripe(_CheckoutForm);
+const CheckoutForm = withRouter(injectStripe(_CheckoutForm));
 
 const Checkout = () => (
   <StripeProvider apiKey="pk_test_pvQDEmbcFPYSRVxLVLK4LILi">
